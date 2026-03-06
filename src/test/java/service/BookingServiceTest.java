@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Test;
 import domain.Appointment;
 import service.rules.CapacityRuleStrategy;
 import service.rules.DurationRuleStrategy;
+import domain.User;
 
 /**
  * Unit tests for BookingService, verifying Sprint 2 requirements.
@@ -15,6 +16,7 @@ import service.rules.DurationRuleStrategy;
 public class BookingServiceTest {
 
     private BookingService bookingService;
+    private User testUser;
 
     @BeforeEach
     void setUp() {
@@ -22,6 +24,7 @@ public class BookingServiceTest {
         // Add our Strategy rules to the service
         bookingService.addRule(new DurationRuleStrategy());
         bookingService.addRule(new CapacityRuleStrategy());
+        testUser = new User("U001", "Test User", "test@student.edu");
     }
 
     @Test
@@ -30,7 +33,7 @@ public class BookingServiceTest {
         // Params: ID, Date, Duration(1 hr), MaxCapacity(5)
         Appointment appt = new Appointment("A100", "2023-11-01 10:00", 1, 5);
         
-        boolean isBooked = bookingService.bookAppointment(appt);
+        boolean isBooked = bookingService.bookAppointment(appt, testUser);
         
         assertTrue(isBooked, "Valid appointment should be booked successfully");
         assertEquals("Confirmed", appt.getStatus(), "Status should be updated to Confirmed");
@@ -43,7 +46,7 @@ public class BookingServiceTest {
         // Params: ID, Date, Duration(3 hrs - INVALID), MaxCapacity(5)
         Appointment longAppt = new Appointment("A101", "2023-11-01 10:00", 3, 5);
         
-        boolean isBooked = bookingService.bookAppointment(longAppt);
+        boolean isBooked = bookingService.bookAppointment(longAppt, testUser);
         
         assertFalse(isBooked, "Appointment exceeding max duration should be rejected");
         assertEquals("Pending", longAppt.getStatus(), "Status should remain Pending");
@@ -55,7 +58,7 @@ public class BookingServiceTest {
         // Params: ID, Date, Duration(1 hr), MaxCapacity(0 - instantly forces capacity rejection since default participants is 1)
         Appointment crowdedAppt = new Appointment("A102", "2023-11-01 10:00", 1, 0);
         
-        boolean isBooked = bookingService.bookAppointment(crowdedAppt);
+        boolean isBooked = bookingService.bookAppointment(crowdedAppt, testUser);
         
         assertFalse(isBooked, "Appointment exceeding capacity should be rejected");
         assertEquals("Pending", crowdedAppt.getStatus(), "Status should remain Pending");

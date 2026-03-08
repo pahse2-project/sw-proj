@@ -63,4 +63,29 @@ public class BookingServiceTest {
         assertFalse(isBooked, "Appointment exceeding capacity should be rejected");
         assertEquals("Pending", crowdedAppt.getStatus(), "Status should remain Pending");
     }
+    
+    @Test
+    void testCancelAppointment_US4() {
+        // 1. Create and book an appointment
+        Appointment appt = new Appointment("A300", "2023-11-10 10:00", 1, 5);
+        bookingService.bookAppointment(appt, testUser);
+        
+        // 2. Attempt to cancel it
+        boolean isCanceled = bookingService.cancelAppointment("A300", testUser);
+        
+        // 3. Verify it was canceled successfully
+        assertTrue(isCanceled, "Appointment should be canceled successfully");
+        assertEquals("Canceled", appt.getStatus(), "Status should be updated to Canceled");
+    }
+
+    @Test
+    void testCancelNonExistentAppointment_US4() {
+        // Attempt to cancel an ID that doesn't exist
+        boolean isCanceled = bookingService.cancelAppointment("FAKE_ID", testUser);
+        
+        // Verify it fails gracefully
+        assertFalse(isCanceled, "Canceling a non-existent appointment should return false");
+    }
 }
+
+

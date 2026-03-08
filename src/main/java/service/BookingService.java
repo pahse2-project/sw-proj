@@ -73,6 +73,36 @@ public class BookingService {
         
         return true;
     }
+    
+    
+    
+    /**
+     * Cancels an existing appointment.
+     * Fulfills Sprint 4 cancellation requirements.
+     * @param appointmentId the ID of the appointment to cancel
+     * @param user the user requesting the cancellation
+     * @return true if successfully canceled, false if not found
+     */
+    public boolean cancelAppointment(String appointmentId, User user) {
+        for (Appointment appointment : savedAppointments) {
+            if (appointment.getAppointmentId().equals(appointmentId)) {
+                appointment.setStatus("Canceled");
+                System.out.println("Appointment " + appointmentId + " has been canceled.");
+                
+                // Trigger Notifications for the cancellation
+                String cancelMessage = "Notice: Your appointment " + appointmentId + " has been canceled.";
+                for (Observer observer : notificationObservers) {
+                    observer.notify(user, cancelMessage);
+                }
+                return true;
+            }
+        }
+        
+        System.out.println("Error: Appointment " + appointmentId + " not found.");
+        return false;
+    }
+    
+    
 
     /**
      * Retrieves all saved appointments.

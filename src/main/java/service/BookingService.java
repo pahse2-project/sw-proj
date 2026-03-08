@@ -102,6 +102,58 @@ public class BookingService {
         return false;
     }
     
+    /**
+     * Modifies the date of an existing appointment.
+     * Fulfills Sprint 4 modification requirements.
+     * @param appointmentId the ID of the appointment to modify
+     * @param newDate the new date and time
+     * @param user the user requesting the modification
+     * @return true if successfully modified, false otherwise
+     */
+    public boolean modifyAppointment(String appointmentId, String newDate, User user) {
+        for (Appointment appointment : savedAppointments) {
+            if (appointment.getAppointmentId().equals(appointmentId) && !appointment.getStatus().equals("Canceled")) {
+                appointment.setDate(newDate); // We need to add a setDate method to Appointment.java
+                System.out.println("Appointment " + appointmentId + " has been modified to " + newDate);
+                
+                // Notify the user of the change
+                String updateMessage = "Update: Your appointment " + appointmentId + " is now scheduled for " + newDate;
+                for (Observer observer : notificationObservers) {
+                    observer.notify(user, updateMessage);
+                }
+                return true;
+            }
+        }
+        System.out.println("Error: Cannot modify. Appointment " + appointmentId + " not found or is canceled.");
+        return false;
+    }
+
+    /**
+     * Administrator override to cancel any appointment.
+     * @param appointmentId the ID of the appointment to cancel
+     * @param admin the administrator performing the override
+     * @return true if canceled, false if not found
+     */
+    public boolean adminCancelAppointment(String appointmentId, domain.Administrator admin) {
+        // Verification that the user is actually an admin could go here
+        System.out.println("Admin Override: " + admin.getName() + " is forcing cancellation of " + appointmentId);
+        return cancelAppointment(appointmentId, admin);
+    }
+    
+    
+    /**
+     * Administrator override to modify any appointment.
+     * Fulfills US4.2 requirements.
+     * @param appointmentId the ID of the appointment to modify
+     * @param newDate the new date and time
+     * @param admin the administrator performing the override
+     * @return true if modified, false if not found
+     */
+    public boolean adminModifyAppointment(String appointmentId, String newDate, domain.Administrator admin) {
+        System.out.println("Admin Override: " + admin.getName() + " is forcing modification of " + appointmentId);
+        return modifyAppointment(appointmentId, newDate, admin); 
+    }
+    
     
 
     /**

@@ -66,26 +66,57 @@ public class BookingServiceTest {
     
     @Test
     void testCancelAppointment_US4() {
-        // 1. Create and book an appointment
         Appointment appt = new Appointment("A300", "2023-11-10 10:00", 1, 5);
         bookingService.bookAppointment(appt, testUser);
         
-        // 2. Attempt to cancel it
         boolean isCanceled = bookingService.cancelAppointment("A300", testUser);
         
-        // 3. Verify it was canceled successfully
         assertTrue(isCanceled, "Appointment should be canceled successfully");
         assertEquals("Canceled", appt.getStatus(), "Status should be updated to Canceled");
     }
 
     @Test
     void testCancelNonExistentAppointment_US4() {
-        // Attempt to cancel an ID that doesn't exist
         boolean isCanceled = bookingService.cancelAppointment("FAKE_ID", testUser);
         
-        // Verify it fails gracefully
         assertFalse(isCanceled, "Canceling a non-existent appointment should return false");
     }
+    
+    @Test
+    void testModifyAppointment_US4() {
+        Appointment appt = new Appointment("A400", "2023-11-15 10:00", 1, 5);
+        bookingService.bookAppointment(appt, testUser);        
+        String newDate = "2023-11-16 14:00";
+        boolean isModified = bookingService.modifyAppointment("A400", newDate, testUser);
+        
+        assertTrue(isModified, "Appointment should be modified successfully");
+        assertEquals(newDate, appt.getDate(), "Appointment date should be updated to the new date");
+    }
+
+    @Test
+    void testAdminCancelOverride_US4() {
+        Appointment appt = new Appointment("A401", "2023-11-20 09:00", 1, 5);
+        bookingService.bookAppointment(appt, testUser);        
+        domain.Administrator admin = new domain.Administrator("ADMIN1", "Admin Boss", "admin@student.edu", "securePass");        
+        boolean isCanceled = bookingService.adminCancelAppointment("A401", admin);
+        
+        assertTrue(isCanceled, "Admin should be able to cancel the appointment");
+        assertEquals("Canceled", appt.getStatus(), "Status should be updated to Canceled");
+    }
+    
+    @Test
+    void testAdminModifyOverride_US4_2() {
+        Appointment appt = new Appointment("A402", "2023-11-22 09:00", 1, 5);
+        bookingService.bookAppointment(appt, testUser);
+        domain.Administrator admin = new domain.Administrator("ADMIN2", "Admin Boss", "admin@student.edu", "securePass");
+        String newDate = "2023-11-23 11:00";
+        boolean isModified = bookingService.adminModifyAppointment("A402", newDate, admin);
+        
+        assertTrue(isModified, "Admin should be able to modify the appointment");
+        assertEquals(newDate, appt.getDate(), "Appointment date should be updated to the new date by admin");
+    }
+    
+    
 }
 
 

@@ -40,4 +40,12 @@ public class Appointment {
     public void setStatus(String status) { this.status = status; }
     
     public String getAppointmentId() { return appointmentId; }
+    
+    public String getDate() { 
+        return date; 
+    }
+
+    public void setDate(String date) { 
+        this.date = date; 
+    }
 }

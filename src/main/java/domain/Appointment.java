@@ -48,4 +48,19 @@ public class Appointment {
     public void setDate(String date) { 
         this.date = date; 
     }
+// --- New Fields & Methods for Sprint 5 (Polymorphism) ---
+    
+    // Default type is standard. Child classes will change this.
+    protected String type = "Standard"; 
+    
+    public String getType() { return type; }
+    
+    /**
+     * Polymorphic method for business rules.
+     * By default, an appointment can be up to 2 hours.
+     * Child classes can override this to apply different rules!
+     */
+    public int getMaxAllowedDuration() { 
+        return 2; 
+    }
 }

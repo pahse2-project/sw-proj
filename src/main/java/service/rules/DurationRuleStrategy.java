@@ -3,17 +3,17 @@ package service.rules;
 import domain.Appointment;
 
 /**
- * Enforces the maximum duration rule (US2.2).
- * Maximum allowed duration is 2 hours.
- */
+ Polymorphism (US5.2).
+ **/
 public class DurationRuleStrategy implements BookingRuleStrategy {
     
-    private static final int MAX_DURATION = 2;
-
     @Override
     public boolean isValid(Appointment appointment) {
-        if (appointment.getDurationInHours() > MAX_DURATION) {
-            System.out.println("Error: Appointment duration exceeds the maximum limit of " + MAX_DURATION + " hours.");
+        // Look here! It asks the appointment for its specific limit!
+        int limit = appointment.getMaxAllowedDuration();
+        
+        if (appointment.getDurationInHours() > limit) {
+            System.out.println("Error: " + appointment.getType() + " appointments cannot exceed " + limit + " hours.");
             return false;
         }
         return true;

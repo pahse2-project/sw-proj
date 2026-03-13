@@ -128,12 +128,7 @@ public class BookingService {
         return false;
     }
 
-    /**
-     * Administrator override to cancel any appointment.
-     * @param appointmentId the ID of the appointment to cancel
-     * @param admin the administrator performing the override
-     * @return true if canceled, false if not found
-     */
+   
     public boolean adminCancelAppointment(String appointmentId, domain.Administrator admin) {
         // Verification that the user is actually an admin could go here
         System.out.println("Admin Override: " + admin.getName() + " is forcing cancellation of " + appointmentId);
@@ -141,25 +136,12 @@ public class BookingService {
     }
     
     
-    /**
-     * Administrator override to modify any appointment.
-     * Fulfills US4.2 requirements.
-     * @param appointmentId the ID of the appointment to modify
-     * @param newDate the new date and time
-     * @param admin the administrator performing the override
-     * @return true if modified, false if not found
-     */
     public boolean adminModifyAppointment(String appointmentId, String newDate, domain.Administrator admin) {
         System.out.println("Admin Override: " + admin.getName() + " is forcing modification of " + appointmentId);
         return modifyAppointment(appointmentId, newDate, admin); 
     }
     
-    
-
-    /**
-     * Retrieves all saved appointments.
-     * @return list of confirmed appointments
-     */
+  
     public List<Appointment> getSavedAppointments() {
         return new ArrayList<>(savedAppointments);
     }

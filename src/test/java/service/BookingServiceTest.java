@@ -116,7 +116,26 @@ public class BookingServiceTest {
         assertEquals(newDate, appt.getDate(), "Appointment date should be updated to the new date by admin");
     }
     
-    
+    @Test
+    void testPolymorphicRules_US5() {
+        // US5.1 & US5.2: Different types, different rules.
+        
+        // 1. A standard appointment of 2 hours is VALID.
+        Appointment standardAppt = new Appointment("A500", "2023-12-01 10:00", 2, 1);
+        boolean isStandardBooked = bookingService.bookAppointment(standardAppt, testUser);
+        assertTrue(isStandardBooked, "Standard 2-hour appointment should be valid");
+        
+        // 2. An Urgent appointment of 2 hours is INVALID (max is 1 hour).
+        domain.UrgentAppointment urgentAppt = new domain.UrgentAppointment("A501", "2023-12-01 13:00", 2);
+        boolean isUrgentBooked = bookingService.bookAppointment(urgentAppt, testUser);
+        assertFalse(isUrgentBooked, "Urgent 2-hour appointment should be rejected due to polymorphic rule");
+        assertEquals("Urgent", urgentAppt.getType(), "Type should be correctly stored as Urgent");
+        
+        // 3. A Group appointment of 3 hours is VALID (max is 3 hours).
+        domain.GroupAppointment groupAppt = new domain.GroupAppointment("A502", "2023-12-02 10:00", 3, 10);
+        boolean isGroupBooked = bookingService.bookAppointment(groupAppt, testUser);
+        assertTrue(isGroupBooked, "Group 3-hour appointment should be valid due to polymorphic rule");
+    }
 }
 
 

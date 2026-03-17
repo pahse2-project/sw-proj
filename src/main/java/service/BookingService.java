@@ -11,17 +11,22 @@ import java.util.List;
  * Service class responsible for coordinating appointment bookings.
  * Evaluates business rules using the Strategy Pattern before confirming.
  * Uses Observer pattern to send notifications.
- * @author [Your Name]
- * @version 1.0
+ * * @author [Your Name]
+ * @version 2.0
  */
 public class BookingService {
     
+    /** List of successfully confirmed and saved appointments. */
     private List<Appointment> savedAppointments;
+    
+    /** List of business rules to enforce via Strategy Pattern. */
     private List<BookingRuleStrategy> bookingRules;
+    
+    /** List of observers to notify via Observer Pattern. */
     private List<Observer> notificationObservers;
 
     /**
-     * Initializes the BookingService with an empty database and rule list.
+     * Initializes the BookingService with empty databases and rule lists.
      */
     public BookingService() {
         this.savedAppointments = new ArrayList<>();
@@ -31,7 +36,7 @@ public class BookingService {
 
     /**
      * Adds a business rule strategy to the service.
-     * @param rule the booking rule to enforce
+     * * @param rule the booking rule to enforce
      */
     public void addRule(BookingRuleStrategy rule) {
         this.bookingRules.add(rule);
@@ -39,21 +44,19 @@ public class BookingService {
 
     /**
      * Adds an observer to the notification list.
-     * @param observer the notifier to add
+     * * @param observer the notifier to add
      */
     public void addObserver(Observer observer) {
         this.notificationObservers.add(observer);
     }
     
-    
     /**
      * Attempts to book an appointment by validating it against all business rules.
-     * Fulfills US2.1, US2.2, and US2.3.
-     * @param appointment the appointment to book
+     * * @param appointment the appointment to book
+     * @param user the user requesting the booking
      * @return true if successfully booked and confirmed, false otherwise
      */
     public boolean bookAppointment(Appointment appointment, User user) {
-        // Enforce all rules (Strategy Pattern)
         for (BookingRuleStrategy rule : bookingRules) {
             if (!rule.isValid(appointment)) {
                 System.out.println("Booking failed for Appointment ID: " + appointment.getAppointmentId());
@@ -61,7 +64,6 @@ public class BookingService {
             }
         }
         
-        // If all rules pass, save and confirm (US2.1)
         appointment.setStatus("Confirmed");
         savedAppointments.add(appointment);
         System.out.println("Booking successful! Appointment " + appointment.getAppointmentId() + " is Confirmed.");
@@ -74,12 +76,9 @@ public class BookingService {
         return true;
     }
     
-    
-    
     /**
      * Cancels an existing appointment.
-     * Fulfills Sprint 4 cancellation requirements.
-     * @param appointmentId the ID of the appointment to cancel
+     * * @param appointmentId the ID of the appointment to cancel
      * @param user the user requesting the cancellation
      * @return true if successfully canceled, false if not found
      */
@@ -89,7 +88,6 @@ public class BookingService {
                 appointment.setStatus("Canceled");
                 System.out.println("Appointment " + appointmentId + " has been canceled.");
                 
-                // Trigger Notifications for the cancellation
                 String cancelMessage = "Notice: Your appointment " + appointmentId + " has been canceled.";
                 for (Observer observer : notificationObservers) {
                     observer.notify(user, cancelMessage);
@@ -104,8 +102,7 @@ public class BookingService {
     
     /**
      * Modifies the date of an existing appointment.
-     * Fulfills Sprint 4 modification requirements.
-     * @param appointmentId the ID of the appointment to modify
+     * * @param appointmentId the ID of the appointment to modify
      * @param newDate the new date and time
      * @param user the user requesting the modification
      * @return true if successfully modified, false otherwise
@@ -113,10 +110,9 @@ public class BookingService {
     public boolean modifyAppointment(String appointmentId, String newDate, User user) {
         for (Appointment appointment : savedAppointments) {
             if (appointment.getAppointmentId().equals(appointmentId) && !appointment.getStatus().equals("Canceled")) {
-                appointment.setDate(newDate); // We need to add a setDate method to Appointment.java
+                appointment.setDate(newDate); 
                 System.out.println("Appointment " + appointmentId + " has been modified to " + newDate);
                 
-                // Notify the user of the change
                 String updateMessage = "Update: Your appointment " + appointmentId + " is now scheduled for " + newDate;
                 for (Observer observer : notificationObservers) {
                     observer.notify(user, updateMessage);
@@ -128,20 +124,33 @@ public class BookingService {
         return false;
     }
 
-   
+    /**
+     * Administrator override to cancel any appointment.
+     * * @param appointmentId the ID of the appointment to cancel
+     * @param admin the administrator performing the override
+     * @return true if canceled, false if not found
+     */
     public boolean adminCancelAppointment(String appointmentId, domain.Administrator admin) {
-        // Verification that the user is actually an admin could go here
         System.out.println("Admin Override: " + admin.getName() + " is forcing cancellation of " + appointmentId);
         return cancelAppointment(appointmentId, admin);
     }
     
-    
+    /**
+     * Administrator override to modify any appointment.
+     * * @param appointmentId the ID of the appointment to modify
+     * @param newDate the new date and time
+     * @param admin the administrator performing the override
+     * @return true if modified, false if not found
+     */
     public boolean adminModifyAppointment(String appointmentId, String newDate, domain.Administrator admin) {
         System.out.println("Admin Override: " + admin.getName() + " is forcing modification of " + appointmentId);
         return modifyAppointment(appointmentId, newDate, admin); 
     }
     
-  
+    /**
+     * Retrieves all saved appointments.
+     * * @return a list of confirmed appointments
+     */
     public List<Appointment> getSavedAppointments() {
         return new ArrayList<>(savedAppointments);
     }

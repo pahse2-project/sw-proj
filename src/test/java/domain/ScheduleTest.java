@@ -12,23 +12,27 @@ import java.util.List;
  */
 public class ScheduleTest {
     
+    /** The schedule instance used for testing. */
     private Schedule schedule;
 
+    /**
+     * Sets up the test environment by initializing the schedule before each test.
+     */
     @BeforeEach
     void setUp() {
         schedule = new Schedule();
     }
 
+    /**
+     * Tests the retrieval of available slots to ensure only valid, non-empty slots are returned.
+     */
     @Test
     void testGetAvailableSlots() {
-        // Acceptance: Only available slots are displayed
         List<String> slots = schedule.getAvailableSlots();
         
-        // Verify the list is successfully retrieved and not empty
         assertNotNull(slots, "Available slots list should not be null");
         assertFalse(slots.isEmpty(), "Available slots list should contain our initial slots");
         
-        // Verify it contains our mock data
         assertTrue(slots.contains("09:00 AM"), "Should contain the 9:00 AM slot");
         assertTrue(slots.contains("10:00 AM"), "Should contain the 10:00 AM slot");
     }

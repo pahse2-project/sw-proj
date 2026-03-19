@@ -67,4 +67,35 @@ public class NotificationTest {
         
         verify(mockObserver, never()).notify(any(User.class), anyString());
     }
+    
+    /**
+     * Tests that a notification is sent when an appointment is canceled.
+     */
+    @Test
+    void testNotificationSentOnCancellation() {
+        Appointment appt = new Appointment("A300", "2023-11-05 10:00", 1, 5);
+        bookingService.bookAppointment(appt, testUser);
+        reset(mockObserver); 
+        bookingService.cancelAppointment("A300", testUser);
+        verify(mockObserver, times(1)).notify(eq(testUser), contains("canceled"));
+    }
+
+    /**
+     * Tests that a notification is sent when an appointment is modified.
+     */
+    @Test
+    void testNotificationSentOnModification() {
+        Appointment appt = new Appointment("A400", "2023-11-05 10:00", 1, 5);
+        bookingService.bookAppointment(appt, testUser); 
+        reset(mockObserver);
+        bookingService.modifyAppointment("A400", "2023-11-06 12:00", testUser);  
+        verify(mockObserver, times(1)).notify(eq(testUser), contains("Update"));
+    }
+    
+    
+    
+    
 }
+
+
+

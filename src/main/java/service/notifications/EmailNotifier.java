@@ -1,18 +1,41 @@
 package service.notifications;
 
 import domain.User;
+import io.github.cdimascio.dotenv.Dotenv;
 
 /**
- * Concrete implementation of the Observer interface for sending emails.
+ * Concrete Observer that sends a REAL email notification using the provided EmailService.
  * @author [Your Name]
- * @version 1.0
+ * @version 2.0
  */
 public class EmailNotifier implements Observer {
 
+    /**
+     * Triggers the real email sending process.
+     * @param user the user who will receive the email
+     * @param message the text/body of the email
+     */
     @Override
     public void notify(User user, String message) {
-        // In a real system, this would connect to an SMTP server.
-        // For our project, we just simulate it with a print statement.
-        System.out.println("Sending Email to " + user.getEmail() + ": " + message);
+        System.out.println("Attempting to send a REAL email to " + user.getEmail() + "...");
+        
+        try {
+            // 1. Load the secret credentials from the .env file
+            Dotenv dotenv = Dotenv.load();  
+            String username = dotenv.get("EMAIL_USERNAME");
+            String password = dotenv.get("EMAIL_PASSWORD");
+            
+            // 2. Create the professor's email service using those credentials
+            EmailService emailService = new EmailService(username, password);
+            
+            // 3. Send the email!
+            String subject = "Appointment System Notification";
+            emailService.sendEmail(user.getEmail(), subject, message);
+            
+            System.out.println("Success: Real email sent to " + user.getEmail() + "!");
+            
+        } catch (Exception e) {
+            System.out.println("Error: Could not send real email. " + e.getMessage());
+        }
     }
 }

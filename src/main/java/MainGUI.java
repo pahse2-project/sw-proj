@@ -23,7 +23,7 @@ public class MainGUI {
         bookingService.addObserver(new EmailNotifier());
         
         // Dummy user for testing
-        currentUser = new User("U1", "Test User", "test@student.edu");
+        currentUser = new User("U1", "Test User", "mayshamayel78@gmail.com");
     }
 
     public void start() {

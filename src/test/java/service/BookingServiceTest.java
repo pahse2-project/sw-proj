@@ -29,7 +29,7 @@ public class BookingServiceTest {
         bookingService = new BookingService();
         bookingService.addRule(new DurationRuleStrategy());
         bookingService.addRule(new CapacityRuleStrategy());
-        testUser = new User("U001", "Test User", "test@student.edu");
+        testUser = new User("U001", "Test User", "mayshamayel78@gmail.com");
     }
 
     /**

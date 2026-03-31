@@ -152,4 +152,19 @@ public class BookingServiceTest {
         boolean isGroupBooked = bookingService.bookAppointment(groupAppt, testUser);
         assertTrue(isGroupBooked, "Group 3-hour appointment should be valid due to polymorphic rule");
     }
+    
+    
+    @Test
+    void testCancelNonExistentAppointment() {
+        boolean result = bookingService.cancelAppointment("FAKE_ID", testUser);
+        assertFalse(result, "Canceling a non-existent appointment should return false");
+    }
+
+    @Test
+    void testModifyNonExistentAppointment() {
+        boolean result = bookingService.modifyAppointment("FAKE_ID", "2023-12-01 10:00", testUser);
+        assertFalse(result, "Modifying a non-existent appointment should return false");
+    }
+    
+    
 }

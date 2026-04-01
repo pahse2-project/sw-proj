@@ -33,7 +33,7 @@ jobs:
         uses: SonarSource/sonarcloud-github-action@master
         with:
           args: >
-            -Dsonar.projectKey=phase2-project_StObMock
+            -Dsonar.projectKey=pahse2-project_sw-proj_StObMock
             -Dsonar.organization=phase2-project
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

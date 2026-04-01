@@ -9,7 +9,15 @@
     <maven.compiler.source>1.8</maven.compiler.source>
     <maven.compiler.target>1.8</maven.compiler.target>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-  </properties>
+ 
+
+    <sonar.organization>pahse2-project</sonar.organization> [cite: 33, 37]
+
+    <sonar.projectKey>pahse2-project_StObMock</sonar.projectKey> [cite: 34, 37]
+
+    <sonar.host.url>https://sonarcloud.io</sonar.host.url> [cite: 35]
+
+</properties>
 
   <dependencies>
     <dependency>

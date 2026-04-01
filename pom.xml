@@ -10,8 +10,8 @@
     <maven.compiler.target>1.8</maven.compiler.target>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
  
-    <sonar.organization>phase2-project</sonar.organization>
-    <sonar.projectKey>phase2-project_StObMock</sonar.projectKey>
+    <sonar.organization>pahse2-project</sonar.organization>
+    <sonar.projectKey>pahse2-project_sw-proj</sonar.projectKey>
     <sonar.host.url>https://sonarcloud.io</sonar.host.url>
   </properties>
 

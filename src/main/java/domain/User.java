@@ -13,7 +13,7 @@ public class User {
     /** The full name of the user. */
     private String name;
     
-    /** The email address of the user. */
+    /**email address of the user. */
     private String email;
 
     /**

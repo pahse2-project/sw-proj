@@ -10,14 +10,10 @@
     <maven.compiler.target>1.8</maven.compiler.target>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
  
-
-    <sonar.organization>pahse2-project</sonar.organization> [cite: 33, 37]
-
-    <sonar.projectKey>pahse2-project_StObMock</sonar.projectKey> [cite: 34, 37]
-
-    <sonar.host.url>https://sonarcloud.io</sonar.host.url> [cite: 35]
-
-</properties>
+    <sonar.organization>phase2-project</sonar.organization>
+    <sonar.projectKey>phase2-project_StObMock</sonar.projectKey>
+    <sonar.host.url>https://sonarcloud.io</sonar.host.url>
+  </properties>
 
   <dependencies>
     <dependency>
@@ -34,8 +30,6 @@
       <scope>test</scope>
     </dependency>
 
-
-
     <dependency>
       <groupId>io.github.cdimascio</groupId>
       <artifactId>dotenv-java</artifactId>
@@ -47,11 +41,16 @@
       <artifactId>jakarta.mail</artifactId>
       <version>2.0.1</version>
     </dependency>
-      </dependencies>
-
+  </dependencies>
 
   <build>
     <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <version>2.22.2</version>
+      </plugin>
+
       <plugin>
         <groupId>org.jacoco</groupId>
         <artifactId>jacoco-maven-plugin</artifactId>

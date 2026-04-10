@@ -43,6 +43,11 @@
     </dependency>
   </dependencies>
 
+<sonar.coverage.exclusions>
+  src/test/**/*,
+  src/main/java/MainGUI.java
+</sonar.coverage.exclusions>
+
   <build>
     <plugins>
       <plugin>

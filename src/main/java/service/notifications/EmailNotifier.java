@@ -20,15 +20,12 @@ public class EmailNotifier implements Observer {
         System.out.println("Attempting to send a REAL email to " + user.getEmail() + "...");
         
         try {
-            // 1. Load the secret credentials from the .env file
             Dotenv dotenv = Dotenv.load();  
             String username = dotenv.get("EMAIL_USERNAME");
             String password = dotenv.get("EMAIL_PASSWORD");
             
-            // 2. Create the professor's email service using those credentials
             EmailService emailService = new EmailService(username, password);
             
-            // 3. Send the email!
             String subject = "Appointment System Notification";
             emailService.sendEmail(user.getEmail(), subject, message);
             

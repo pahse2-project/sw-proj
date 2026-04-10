@@ -1,20 +1,23 @@
 package service.notifications;
 
-import domain.User;
+
 import jakarta.mail.*;
 import jakarta.mail.internet.*;
 import java.util.Properties;
 import io.github.cdimascio.dotenv.Dotenv;
 
-import jakarta.mail.*;
-import jakarta.mail.internet.*;
+
+
 
 import java.util.Properties;
 
 import io.github.cdimascio.dotenv.Dotenv;
 
 public class EmailService {
-
+	
+private static final java.util.logging.Logger LOGGER =
+    java.util.logging.Logger.getLogger(EmailService.class.getName());
+	
     private final String username;
     private final String password;
 
@@ -51,10 +54,10 @@ public class EmailService {
             // Send email
             Transport.send(message);
 
-            System.out.println("Email sent successfully to " + to);
+           LOGGER.info("Email sent successfully to " + to);
 
         } catch (MessagingException e) {
-            e.printStackTrace();
+           LOGGER.severe("Failed to send email: " + e.getMessage());
             throw new RuntimeException(" Failed to send email", e);
         }
     }

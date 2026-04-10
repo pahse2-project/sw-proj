@@ -42,32 +42,20 @@ public class DateRuleStrategyTest {
     
     @Test
     void testAppointmentAtExactCurrentTime() {
-        // Mock the time to be EXACTLY the same as the appointment time
         when(mockTimeProvider.now()).thenReturn(LocalDateTime.of(2023, 12, 1, 10, 0));
         Appointment exactAppt = new Appointment("A4", "2023-12-01 10:00", 1, 5);
         
-        // isBefore() should return false here, meaning the appointment is valid
         assertTrue(dateRule.isValid(exactAppt), "Appointment at the exact current time should be valid");
     }
 
     @Test
     void testNullAppointmentDateIsRejected() {
-        // Create an appointment with a 'null' date to trigger a different type of Exception
         Appointment nullDateAppt = new Appointment("A5", null, 1, 5);
         
-        // The catch block should handle this gracefully and return false
         assertFalse(dateRule.isValid(nullDateAppt), "Appointment with a null date should be rejected");
     }
     
     
     
-//    @Test
-//    void testInvalidDateFormatIsRejected() {
-//        // Create an appointment with a completely invalid date string
-//        Appointment badFormatAppt = new Appointment("A3", "Not-a-real-date", 1, 5);
-//        
-//        // The rule should catch the Exception and return false
-//        assertFalse(dateRule.isValid(badFormatAppt), "Appointment with bad date format should be rejected");
-//    }
     
 }

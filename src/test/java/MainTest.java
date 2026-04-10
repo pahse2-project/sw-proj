@@ -3,7 +3,7 @@ import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
-class MainTest {
+public class MainTest {
 
     @Test
     void testMainMethod() {

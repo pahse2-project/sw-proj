@@ -1,8 +1,10 @@
 package service.notifications;
+
 import jakarta.mail.*;
 import jakarta.mail.internet.*;
 import java.util.Properties;
 import io.github.cdimascio.dotenv.Dotenv;
+import java.util.logging.Level;
 
 public class EmailService {
 
@@ -26,6 +28,7 @@ public class EmailService {
         props.put("mail.smtp.port", "587");
 
         Session session = Session.getInstance(props, new Authenticator() {
+            @Override
             protected PasswordAuthentication getPasswordAuthentication() {
                 return new PasswordAuthentication(username, password);
             }
@@ -39,25 +42,33 @@ public class EmailService {
             message.setText(body);
             Transport.send(message);
 
-            // __ln__ 75 fix: use String.format instead of concatenation
-            LOGGER.info(String.format("Email sent successfully to %s", to));
+            // FIX S2629: Use message format placeholders {0} for lazy evaluation
+            LOGGER.log(Level.INFO, "Email sent successfully to {0}", to);
 
         } catch (MessagingException e) {
-            // __ln__ 59 fix: log AND __rethrow__ with contextual info
-            LOGGER.severe(String.format("Failed to send email to %s: %s", to, e.getMessage()));
-            throw new RuntimeException("Failed to send email to: " + to, e);
+            /* FIX S2139 & S112: 
+               Do not log AND throw. Throwing a specific exception with the 
+               original 'e' as the cause allows the caller to handle/log it.
+            */
+            throw new IllegalStateException("Failed to send email to: " + to, e);
         }
     }
 
     static void run() {
         Dotenv dotenv = Dotenv.load();
-        String username = dotenv.get("EMAIL_USERNAME");
-        String password = dotenv.get("EMAIL_PASSWORD");
+        String user = dotenv.get("EMAIL_USERNAME");
+        String pass = dotenv.get("EMAIL_PASSWORD");
 
-        EmailService emailService = new EmailService(username, password);
+        EmailService emailService = new EmailService(user, pass);
         String subject = "Appointment";
         String body = "Dear user, Your Appointment is coming soon. Best regards";
-        emailService.sendEmail("s12323849@stu.najah.edu", subject, body);
+        
+        try {
+            emailService.sendEmail("s12323849@stu.najah.edu", subject, body);
+        } catch (IllegalStateException e) {
+            // Log once at the top level (the entry point)
+            LOGGER.log(Level.SEVERE, "Application error during email dispatch", e);
+        }
     }
 
     public static void main(String[] s) {

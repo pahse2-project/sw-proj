@@ -1,13 +1,13 @@
 package service.notifications;
 
-import domain.User;
+
 import jakarta.mail.*;
 import jakarta.mail.internet.*;
 import java.util.Properties;
 import io.github.cdimascio.dotenv.Dotenv;
 
-import jakarta.mail.*;
-import jakarta.mail.internet.*;
+
+
 
 import java.util.Properties;
 

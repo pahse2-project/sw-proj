@@ -19,7 +19,6 @@ public class MainTest {
 
         try (ByteArrayInputStream simulatedInput = new ByteArrayInputStream(simulatedUserInput.getBytes())) {
             System.setIn(simulatedInput);
-
             assertDoesNotThrow(() -> Main.main(new String[]{}));
 
         } catch (Exception e) {

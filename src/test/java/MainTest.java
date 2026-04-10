@@ -1,27 +1,29 @@
 import org.junit.jupiter.api.Test;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
 public class MainTest {
 
     @Test
     void testMainMethod() {
-        
-        String simulatedUserInput = 
-            "1\n" +                  // Choose Option 1 (Book)
-            "A99\n" +                // Enter Appt ID
-            "2023-12-01 10:00\n" +   // Enter Date
-            "2\n" +                  // Enter Duration
-            "2\n" +                  // Choose Option 2 (View)
-            "3\n";                   // Choose Option 3 (Exit)
+        String simulatedUserInput =
+            "1\n" +
+            "A99\n" +
+            "2023-12-01 10:00\n" +
+            "2\n" +
+            "2\n" +
+            "3\n";
 
         InputStream originalSystemIn = System.in;
 
-        try {
-            System.setIn(new ByteArrayInputStream(simulatedUserInput.getBytes()));
+        try (ByteArrayInputStream simulatedInput = new ByteArrayInputStream(simulatedUserInput.getBytes())) {
+            System.setIn(simulatedInput);
 
-            Main.main(new String[]{});
-            
+            assertDoesNotThrow(() -> Main.main(new String[]{}));
+
+        } catch (Exception e) {
+            System.setIn(originalSystemIn);
         } finally {
             System.setIn(originalSystemIn);
         }

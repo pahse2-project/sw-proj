@@ -29,7 +29,7 @@ public class MainGUI {
     public void start() {
         // 2. Build the Window (JFrame)
         JFrame frame = new JFrame("Appointment Scheduling System");
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         frame.setSize(350, 400);
         frame.setLayout(new FlowLayout(FlowLayout.CENTER, 10, 10));
 

@@ -2,6 +2,7 @@ package service.notifications;
 import jakarta.mail.*;
 import jakarta.mail.internet.*;
 import java.util.Properties;
+import java.util.logging.Level;
 import io.github.cdimascio.dotenv.Dotenv;
 
 public class EmailService {
@@ -17,7 +18,7 @@ public class EmailService {
         this.password = password;
     }
 
-    public void sendEmail(String to, String subject, String body) {
+    public void sendEmail(String to, String subject, String body) throws MessagingException {
 
         Properties props = new Properties();
         props.put("mail.smtp.auth", "true");
@@ -39,13 +40,13 @@ public class EmailService {
             message.setText(body);
             Transport.send(message);
 
-            // ln 75 fix: use String.format instead of concatenation
-            LOGGER.info(String.format("Email sent successfully to %s", to));
+            // L43 fix: conditional invocation using lambda (only builds string if INFO is enabled)
+            LOGGER.log(Level.INFO, "Email sent successfully to {0}", to);
 
         } catch (MessagingException e) {
-            // ln 59 fix: log AND rethrow with contextual info
-            LOGGER.severe(String.format("Failed to send email to %s: %s", to, e.getMessage()));
-            throw new RuntimeException("Failed to send email to: " + to, e);
+            // L45 fix: only rethrow (no double logging), with contextual info
+            // L48 fix: throw MessagingException instead of generic RuntimeException
+            throw new MessagingException("Failed to send email to: " + to, e);
         }
     }
 
@@ -57,7 +58,11 @@ public class EmailService {
         EmailService emailService = new EmailService(username, password);
         String subject = "Appointment";
         String body = "Dear user, Your Appointment is coming soon. Best regards";
-        emailService.sendEmail("s12323849@stu.najah.edu", subject, body);
+        try {
+            emailService.sendEmail("s12323849@stu.najah.edu", subject, body);
+        } catch (MessagingException e) {
+            LOGGER.log(Level.SEVERE, "Email failed in run(): {0}", e.getMessage());
+        }
     }
 
     public static void main(String[] s) {

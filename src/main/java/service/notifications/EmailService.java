@@ -2,7 +2,6 @@ package service.notifications;
 import jakarta.mail.*;
 import jakarta.mail.internet.*;
 import java.util.Properties;
-import java.util.logging.Level;
 import io.github.cdimascio.dotenv.Dotenv;
 
 public class EmailService {
@@ -18,7 +17,7 @@ public class EmailService {
         this.password = password;
     }
 
-    public void sendEmail(String to, String subject, String body) throws MessagingException {
+    public void sendEmail(String to, String subject, String body) {
 
         Properties props = new Properties();
         props.put("mail.smtp.auth", "true");
@@ -40,13 +39,13 @@ public class EmailService {
             message.setText(body);
             Transport.send(message);
 
-            // L43 fix: conditional invocation using lambda (only builds string if INFO is enabled)
-            LOGGER.log(Level.INFO, "Email sent successfully to {0}", to);
+            // __ln__ 75 fix: use String.format instead of concatenation
+            LOGGER.info(String.format("Email sent successfully to %s", to));
 
         } catch (MessagingException e) {
-            // L45 fix: only rethrow (no double logging), with contextual info
-            // L48 fix: throw MessagingException instead of generic RuntimeException
-            throw new MessagingException("Failed to send email to: " + to, e);
+            // __ln__ 59 fix: log AND __rethrow__ with contextual info
+            LOGGER.severe(String.format("Failed to send email to %s: %s", to, e.getMessage()));
+            throw new RuntimeException("Failed to send email to: " + to, e);
         }
     }
 
@@ -58,11 +57,7 @@ public class EmailService {
         EmailService emailService = new EmailService(username, password);
         String subject = "Appointment";
         String body = "Dear user, Your Appointment is coming soon. Best regards";
-        try {
-            emailService.sendEmail("s12323849@stu.najah.edu", subject, body);
-        } catch (MessagingException e) {
-            LOGGER.log(Level.SEVERE, "Email failed in run(): {0}", e.getMessage());
-        }
+        emailService.sendEmail("s12323849@stu.najah.edu", subject, body);
     }
 
     public static void main(String[] s) {

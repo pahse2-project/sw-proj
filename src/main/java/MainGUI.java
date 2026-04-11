@@ -25,7 +25,7 @@ public class MainGUI {
         bookingService.addRule(new CapacityRuleStrategy());
         bookingService.addObserver(new EmailNotifier());
 
-        guestUser = new User("U1", "Guest User", "mayshamayel78@gmail.com"); // Put your email here!
+        guestUser = new User("U1", "Guest User", "mayshamayel78@gmail.com"); 
         
         Dotenv dotenv = Dotenv.configure().ignoreIfMissing().load();
         String adminPass = dotenv.get("ADMIN_PASSWORD", "admin123"); 

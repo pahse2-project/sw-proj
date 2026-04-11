@@ -11,25 +11,12 @@ import service.notifications.Observer;
 import service.rules.DurationRuleStrategy;
 import service.rules.CapacityRuleStrategy;
 
-/**
- * Unit tests for Sprint 3: Notifications using the Observer Pattern and Mockito.
- * @author [Your Name]
- * @version 1.0
- */
 public class NotificationTest {
 
-    /** The booking service instance used for testing. */
     private BookingService bookingService;
-    
-    /** A mocked observer to verify notification behaviors. */
     private Observer mockObserver;
-    
-    /** A test user representing the person receiving notifications. */
     private User testUser;
 
-    /**
-     * Sets up the test environment by initializing the service, adding rules, and configuring the mock observer.
-     */
     @BeforeEach
     void setUp() {
         bookingService = new BookingService();
@@ -42,60 +29,51 @@ public class NotificationTest {
         testUser = new User("U1", "Alice", "alice@example.com");
     }
 
-    /**
-     * Tests that a notification is successfully sent to the observer when a booking succeeds.
-     */
     @Test
     void testNotificationSentOnSuccessfulBooking() {
         Appointment appt = new Appointment("A200", "2023-11-05 10:00", 1, 5);
+        bookingService.addAvailableSlot(appt);
         
-        boolean isBooked = bookingService.bookAppointment(appt, testUser);
+        boolean isBooked = bookingService.bookAppointment("A200", testUser);
         assertTrue(isBooked, "Appointment should be successfully booked");
         
         verify(mockObserver, times(1)).notify(eq(testUser), contains("A200"));
     }
 
-    /**
-     * Tests that no notification is sent if the booking is rejected by business rules.
-     */
     @Test
     void testNotificationNotSentOnFailedBooking() {
         Appointment longAppt = new Appointment("A201", "2023-11-05 10:00", 3, 5);
+        bookingService.addAvailableSlot(longAppt);
         
-        boolean isBooked = bookingService.bookAppointment(longAppt, testUser);
+        boolean isBooked = bookingService.bookAppointment("A201", testUser);
         assertFalse(isBooked, "Appointment should fail validation");
         
         verify(mockObserver, never()).notify(any(User.class), anyString());
     }
     
-    /**
-     * Tests that a notification is sent when an appointment is canceled.
-     */
     @Test
     void testNotificationSentOnCancellation() {
         Appointment appt = new Appointment("A300", "2023-11-05 10:00", 1, 5);
-        bookingService.bookAppointment(appt, testUser);
+        bookingService.addAvailableSlot(appt);
+        bookingService.bookAppointment("A300", testUser);
         reset(mockObserver); 
-        bookingService.cancelAppointment("A300", testUser);
-        verify(mockObserver, times(1)).notify(eq(testUser), contains("canceled"));
+        
+        bookingService.cancelUserAppointment("A300", testUser);
+        
+        // Match the string "Cancel" generated in BookingService
+        verify(mockObserver, times(1)).notify(eq(testUser), contains("Cancel"));
     }
 
-    /**
-     * Tests that a notification is sent when an appointment is modified.
-     */
     @Test
     void testNotificationSentOnModification() {
         Appointment appt = new Appointment("A400", "2023-11-05 10:00", 1, 5);
-        bookingService.bookAppointment(appt, testUser); 
+        bookingService.addAvailableSlot(appt);
+        bookingService.bookAppointment("A400", testUser); 
         reset(mockObserver);
+        
         bookingService.modifyAppointment("A400", "2023-11-06 12:00", testUser);  
+        
+        // Match the string "Update" generated in BookingService
         verify(mockObserver, times(1)).notify(eq(testUser), contains("Update"));
     }
-    
-    
-    
-    
 }
-
-
-

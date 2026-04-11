@@ -2,156 +2,137 @@ package service;
 
 import domain.Appointment;
 import domain.User;
-import service.notifications.Observer;
 import service.rules.BookingRuleStrategy;
+import service.notifications.Observer;
+
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
-/**
- * Service class responsible for coordinating appointment bookings.
- * Evaluates business rules using the Strategy Pattern before confirming.
- * Uses Observer pattern to send notifications.
- * * @author [Your Name]
- * @version 2.0
- */
 public class BookingService {
-    
-    /** List of successfully confirmed and saved appointments. */
-    private List<Appointment> savedAppointments;
-    
-    /** List of business rules to enforce via Strategy Pattern. */
-    private List<BookingRuleStrategy> bookingRules;
-    
-    /** List of observers to notify via Observer Pattern. */
-    private List<Observer> notificationObservers;
 
-    /**
-     * Initializes the BookingService with empty databases and rule lists.
-     */
+    private List<Appointment> savedAppointments;
+    private List<BookingRuleStrategy> rules;
+    private List<Observer> observers;
+    
+    // Tracks which user booked which appointment
+    private Map<String, User> userBookings;
+
     public BookingService() {
         this.savedAppointments = new ArrayList<>();
-        this.bookingRules = new ArrayList<>();
-        this.notificationObservers = new ArrayList<>();
+        this.rules = new ArrayList<>();
+        this.observers = new ArrayList<>();
+        this.userBookings = new HashMap<>();
     }
 
-    /**
-     * Adds a business rule strategy to the service.
-     * * @param rule the booking rule to enforce
-     */
-    public void addRule(BookingRuleStrategy rule) {
-        this.bookingRules.add(rule);
+    public void addRule(BookingRuleStrategy rule) { rules.add(rule); }
+    public void addObserver(Observer observer) { observers.add(observer); }
+
+    // --- ADMIN METHODS ---
+    public boolean addAvailableSlot(Appointment appt) {
+        appt.setStatus("Available"); // Set default status
+        return savedAppointments.add(appt);
     }
 
-    /**
-     * Adds an observer to the notification list.
-     * * @param observer the notifier to add
-     */
-    public void addObserver(Observer observer) {
-        this.notificationObservers.add(observer);
+    public boolean adminDeleteSlot(String apptId) {
+        userBookings.remove(apptId);
+        return savedAppointments.removeIf(a -> a.getAppointmentId().equals(apptId));
     }
+
+    // --- USER METHODS (WITH CONCURRENCY FIX) ---
     
-    /**
-     * Attempts to book an appointment by validating it against all business rules.
-     * * @param appointment the appointment to book
-     * @param user the user requesting the booking
-     * @return true if successfully booked and confirmed, false otherwise
-     */
-    public boolean bookAppointment(Appointment appointment, User user) {
-        for (BookingRuleStrategy rule : bookingRules) {
-            if (!rule.isValid(appointment)) {
-                System.out.println("Booking failed for Appointment ID: " + appointment.getAppointmentId());
-                return false;
-            }
-        }
-        
-        appointment.setStatus("Confirmed");
-        savedAppointments.add(appointment);
-        System.out.println("Booking successful! Appointment " + appointment.getAppointmentId() + " is Confirmed.");
-        
-        String reminderMessage = "Reminder: Your appointment " + appointment.getAppointmentId() + " is confirmed.";
-        for (Observer observer : notificationObservers) {
-            observer.notify(user, reminderMessage);
-        }
-        
-        return true;
-    }
-    
-    /**
-     * Cancels an existing appointment.
-     * * @param appointmentId the ID of the appointment to cancel
-     * @param user the user requesting the cancellation
-     * @return true if successfully canceled, false if not found
-     */
-    public boolean cancelAppointment(String appointmentId, User user) {
-        for (Appointment appointment : savedAppointments) {
-            if (appointment.getAppointmentId().equals(appointmentId)) {
-                appointment.setStatus("Canceled");
-                System.out.println("Appointment " + appointmentId + " has been canceled.");
-                
-                String cancelMessage = "Notice: Your appointment " + appointmentId + " has been canceled.";
-                for (Observer observer : notificationObservers) {
-                    observer.notify(user, cancelMessage);
+    // The 'synchronized' keyword fixes the conflict! Only one thread can enter at a time.
+    public synchronized boolean bookAppointment(String apptId, User user) {
+        for (Appointment a : savedAppointments) {
+            if (a.getAppointmentId().equals(apptId)) {
+                // Check if it's actually available
+                if (!"Available".equals(a.getStatus())) {
+                    return false; // Someone else beat them to it!
                 }
+                
+                // Validate Business Rules
+                for (BookingRuleStrategy rule : rules) {
+                    if (!rule.isValid(a)) return false;
+                }
+
+                // Confirm booking
+                a.setStatus("Confirmed");
+                userBookings.put(apptId, user);
+                notifyObservers(user, "Your appointment " + apptId + " is Confirmed.");
                 return true;
             }
         }
-        
-        System.out.println("Error: Appointment " + appointmentId + " not found.");
-        return false;
-    }
-    
-    /**
-     * Modifies the date of an existing appointment.
-     * * @param appointmentId the ID of the appointment to modify
-     * @param newDate the new date and time
-     * @param user the user requesting the modification
-     * @return true if successfully modified, false otherwise
-     */
-    public boolean modifyAppointment(String appointmentId, String newDate, User user) {
-        for (Appointment appointment : savedAppointments) {
-            if (appointment.getAppointmentId().equals(appointmentId) && !appointment.getStatus().equals("Canceled")) {
-                appointment.setDate(newDate); 
-                System.out.println("Appointment " + appointmentId + " has been modified to " + newDate);
-                
-                String updateMessage = "Update: Your appointment " + appointmentId + " is now scheduled for " + newDate;
-                for (Observer observer : notificationObservers) {
-                    observer.notify(user, updateMessage);
-                }
-                return true;
-            }
-        }
-        System.out.println("Error: Cannot modify. Appointment " + appointmentId + " not found or is canceled.");
         return false;
     }
 
-    /**
-     * Administrator override to cancel any appointment.
-     * * @param appointmentId the ID of the appointment to cancel
-     * @param admin the administrator performing the override
-     * @return true if canceled, false if not found
-     */
-    public boolean adminCancelAppointment(String appointmentId, domain.Administrator admin) {
-        System.out.println("Admin Override: " + admin.getName() + " is forcing cancellation of " + appointmentId);
-        return cancelAppointment(appointmentId, admin);
+    public boolean cancelUserAppointment(String apptId, User user) {
+        // Ensure the user actually owns this booking
+        if (user.equals(userBookings.get(apptId))) {
+            for (Appointment a : savedAppointments) {
+                if (a.getAppointmentId().equals(apptId)) {
+                    a.setStatus("Available"); // Make it available for others again
+                    userBookings.remove(apptId);
+                    notifyObservers(user, "Your appointment " + apptId + " was Cancelled.");
+                    return true;
+                }
+            }
+        }
+        return false;
     }
-    
-    /**
-     * Administrator override to modify any appointment.
-     * * @param appointmentId the ID of the appointment to modify
-     * @param newDate the new date and time
-     * @param admin the administrator performing the override
-     * @return true if modified, false if not found
-     */
-    public boolean adminModifyAppointment(String appointmentId, String newDate, domain.Administrator admin) {
-        System.out.println("Admin Override: " + admin.getName() + " is forcing modification of " + appointmentId);
-        return modifyAppointment(appointmentId, newDate, admin); 
+
+    // --- GETTERS ---
+    public List<Appointment> getAvailableAppointments() {
+        List<Appointment> available = new ArrayList<>();
+        for (Appointment a : savedAppointments) {
+            if ("Available".equals(a.getStatus())) {
+                available.add(a);
+            }
+        }
+        return available;
     }
-    
-    /**
-     * Retrieves all saved appointments.
-     * * @return a list of confirmed appointments
-     */
-    public List<Appointment> getSavedAppointments() {
-        return new ArrayList<>(savedAppointments);
+
+    public List<Appointment> getMyBookings(User user) {
+        List<Appointment> mine = new ArrayList<>();
+        for (Appointment a : savedAppointments) {
+            if (user.equals(userBookings.get(a.getAppointmentId()))) {
+                mine.add(a);
+            }
+        }
+        return mine;
+    }
+
+    public List<Appointment> getAllAppointments() {
+        return new ArrayList<>(savedAppointments); // Return a copy for UI
+    }
+
+    private void notifyObservers(User user, String message) {
+        for (Observer obs : observers) {
+            obs.notify(user, message);
+        }
+    }
+ // Add this to the USER METHODS section in BookingService.java
+    public boolean modifyAppointment(String apptId, String newDate, User user) {
+        if (user.equals(userBookings.get(apptId))) {
+            for (Appointment a : savedAppointments) {
+                if (a.getAppointmentId().equals(apptId)) {
+                    a.setDate(newDate);
+                    notifyObservers(user, "Your appointment " + apptId + " was Updated.");
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    // Add this to the ADMIN METHODS section in BookingService.java
+    public boolean adminModifyAppointment(String apptId, String newDate, domain.Administrator admin) {
+        for (Appointment a : savedAppointments) {
+            if (a.getAppointmentId().equals(apptId)) {
+                a.setDate(newDate);
+                return true;
+            }
+        }
+        return false;
     }
 }
